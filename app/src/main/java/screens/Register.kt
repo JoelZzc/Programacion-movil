@@ -3,6 +3,7 @@ package com.example.pantallaprincipal.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +32,32 @@ import com.example.pantallaprincipal.R
 
 @Composable
 fun RegisterScreen(navController: NavHostController) {
+
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+
+
+    val nameValid = name.matches(Regex("^[a-zA-Z ]+$"))
+
+    val emailValid = android.util.Patterns.EMAIL_ADDRESS
+        .matcher(email)
+        .matches()
+
+    val phoneValid = phone.matches(Regex("^\\d{10}$"))
+
+    val passwordValid = password.isNotEmpty()
+
+    val passwordsMatch = password == confirmPassword
+
+    val formValid =
+        nameValid &&
+                emailValid &&
+                phoneValid &&
+                passwordValid &&
+                passwordsMatch
 
     Box(
         modifier = Modifier
@@ -54,7 +86,7 @@ fun RegisterScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Login",
+                text = "Register",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
@@ -63,80 +95,66 @@ fun RegisterScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             // NAME
-            Column(modifier = Modifier.fillMaxWidth()) {
-
-                Text(
-                    text = "Name",
-                    fontSize = 14.sp,
-                    color = Color.Gray
-                )
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .border(
-                            1.dp,
-                            Color.LightGray,
-                            RoundedCornerShape(10.dp)
-                        )
-                )
-            }
+            TextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Name") },
+                modifier = Modifier.fillMaxWidth(),
+                isError = name.isNotEmpty() && !nameValid
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // EMAIL
-            Column(modifier = Modifier.fillMaxWidth()) {
-
-                Text(
-                    text = "Email",
-                    fontSize = 14.sp,
-                    color = Color.Gray
-                )
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .border(
-                            1.dp,
-                            Color.LightGray,
-                            RoundedCornerShape(10.dp)
-                        )
-                )
-            }
+            TextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth(),
+                isError = email.isNotEmpty() && !emailValid
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // PHONE
+            TextField(
+                value = phone,
+                onValueChange = { phone = it },
+                label = { Text("Phone") },
+                modifier = Modifier.fillMaxWidth(),
+                isError = phone.isNotEmpty() && !phoneValid
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             // PASSWORD
+            TextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
             Column(modifier = Modifier.fillMaxWidth()) {
 
                 Text(
-                    text = "Password",
+                    text = "Confirm Password",
                     fontSize = 14.sp,
                     color = Color.Gray
                 )
 
-                Box(
+                TextField(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp)
-                        .border(
-                            1.dp,
-                            Color.LightGray,
-                            RoundedCornerShape(10.dp)
-                        )
+                        .height(50.dp),
+                    singleLine = true,
+                    isError = confirmPassword.isNotEmpty() && !passwordsMatch
                 )
             }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = "Forgot password?",
-                fontSize = 12.sp,
-                color = Color.Gray,
-                modifier = Modifier.align(Alignment.Start)
-            )
 
             Spacer(modifier = Modifier.height(30.dp))
 
@@ -146,8 +164,11 @@ fun RegisterScreen(navController: NavHostController) {
                     .align(Alignment.End)
                     .height(50.dp)
                     .width(120.dp)
+                    .clickable(enabled = formValid) {
+                        println("Registro correcto")
+                    }
                     .background(
-                        Color(0xFF5E4AE3),
+                        if (formValid) Color(0xFF5E4AE3) else Color.Gray,
                         RoundedCornerShape(30.dp)
                     ),
                 contentAlignment = Alignment.Center
