@@ -1,30 +1,93 @@
 package screens
 
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.remote.creation.first
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import components.Contact
-import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun MainScreen(navController: NavController){
-    val contacs = listOf(Pair( first = "Juan Perez", second = "612-305-0012"))
+fun MainScreen(navController: NavController) {
 
-    //lista en un estado
-    val contactList = remember { mutableStateOf(Pair) }
+    var name by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
 
-    LazyColumn() {
-        items( contacs){
-            contact ->
-            Contact(name = contact.first, phone= contact.second)
+    val contactList = remember {
+        mutableStateListOf(
+            Pair("Ana García", "612345678"),
+            Pair("Carlos Rodríguez", "699888777")
+        )
+    }
 
-            //agregar elementos
+    Column {
 
-            contactList.add(Pair(firs = name, second= phone))
+        TextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Nombre") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        TextField(
+            value = phone,
+            onValueChange = {
+                if (it.length <= 10) phone = it.filter { c -> c.isDigit() }
+            },
+            label = { Text("Teléfono") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        // 🔹 BOTÓN AGREGAR
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp)
+                .background(Color(0xFF3D5AFE), RoundedCornerShape(10.dp))
+                .clickable {
+                    if (name.isNotEmpty() && phone.length == 10) {
+                        contactList.add(Pair(name, phone))
+                        name = ""
+                        phone = ""
+                    }
+                }
+                .padding(15.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Agregar Contacto", color = Color.White)
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp)
+                .background(Color.LightGray, RoundedCornerShape(10.dp))
+                .clickable {
+                    name = ""
+                    phone = ""
+                }
+                .padding(15.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Limpiar Campos")
+        }
+
+        LazyColumn {
+            items(contactList) { contact ->
+                Contact(
+                    name = contact.first,
+                    phone = contact.second
+                )
+            }
         }
     }
 }
-
